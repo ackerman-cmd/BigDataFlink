@@ -1,0 +1,152 @@
+package com.example.service;
+
+import com.example.dto.CsvRecordDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.CsvToBeanFilter;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class CsvProcessingService {
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
+    @Value("${file.source.path}")
+    private String sourcePath;
+
+    @Value("${kafka.topic}")
+    private String topic;
+
+    private static final int THREAD_POOL_SIZE = 10;
+
+    public void processFiles() {
+        log.info("Starting CSV processing from directory: {}", sourcePath);
+        try {
+            Path directory = Paths.get(sourcePath);
+            if (!Files.isDirectory(directory)) {
+                log.error("Path {} is not a directory", sourcePath);
+                return;
+            }
+
+            ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+            try {
+                Files.list(directory)
+                        .filter(path -> path.toString().endsWith(".csv"))
+                        .forEach(path -> executorService.submit(() -> processFile(path)));
+
+                executorService.shutdown();
+                if (!executorService.awaitTermination(2, TimeUnit.HOURS)) {
+                    log.warn("Processing did not complete within the timeout period");
+                    executorService.shutdownNow();
+                }
+            } catch (Exception e) {
+                log.error("Error processing CSV files", e);
+                executorService.shutdownNow();
+            }
+        } catch (Exception e) {
+            log.error("Error accessing directory: {}", sourcePath, e);
+        }
+    }
+
+    private void processFile(Path filePath) {
+        log.info("Processing file: {}", filePath);
+        long processedLines = 0;
+        long skippedLines = 0;
+
+        try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
+            if (!reader.ready()) {
+                log.warn("File {} is empty or unreadable", filePath);
+                return;
+            }
+
+            HeaderColumnNameMappingStrategy<CsvRecordDTO> strategy = new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(CsvRecordDTO.class);
+
+            CSVParser parser = new CSVParserBuilder()
+                    .withSeparator(',')
+                    .withQuoteChar('"')
+                    .build();
+
+            CSVReader csvReader = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .build();
+
+            CsvToBean<CsvRecordDTO> csvToBean = new CsvToBeanBuilder<CsvRecordDTO>(csvReader)
+                    .withType(CsvRecordDTO.class)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreEmptyLine(true)
+                    .withThrowExceptions(false)
+                    .build();
+
+            for (CsvRecordDTO dto : csvToBean) {
+                try {
+                    if (!isValidRecord(dto)) {
+                        log.warn("Invalid record in file {}: {}. Skipping.", filePath, dto);
+                        skippedLines++;
+                        continue;
+                    }
+                    String json = objectMapper.writeValueAsString(dto);
+                    kafkaTemplate.send(topic, json);
+                    processedLines++;
+
+                    if (processedLines % 1000 == 0) {
+                        log.info("Processed {} lines from file: {}", processedLines, filePath);
+                    }
+                } catch (Exception e) {
+                    log.error("Error processing record in file {}: {}", filePath, dto, e);
+                    skippedLines++;
+                }
+            }
+
+            csvToBean.getCapturedExceptions().forEach(e ->
+                    log.error("Parsing error in file {} at line {}: {}",
+                            filePath, e.getLineNumber(), e.getMessage()));
+
+            log.info("Finished processing file: {}, total lines processed: {}, skipped: {}",
+                    filePath, processedLines, skippedLines);
+        } catch (Exception e) {
+            log.error("Error reading file: {}", filePath, e);
+        }
+    }
+
+    private boolean isValidRecord(CsvRecordDTO dto) {
+        if (dto == null) {
+            return false;
+        }
+        return dto.getId() != null &&
+                dto.getCustomerAge() != null &&
+                dto.getProductPrice() != null &&
+                dto.getSaleDate() != null &&
+                dto.getSaleCustomerId() != null &&
+                dto.getSaleSellerId() != null &&
+                dto.getSaleProductId() != null &&
+                dto.getSaleQuantity() != null &&
+                dto.getSaleTotalPrice() != null &&
+                dto.getProductWeight() != null &&
+                dto.getProductRating() != null &&
+                dto.getProductReviews() != null;
+    }
+}
