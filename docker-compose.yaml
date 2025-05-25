@@ -1,0 +1,13 @@
+include:
+  - 'devops/postgres/docker-compose-postgres.yaml'
+  - 'devops/kafka/docker-compose-kafka.yaml'
+  - 'devops/zookeper/docker-compose-zookeper.yaml'
+  - 'devops/flink/docker-compose-flink.yaml'
+  - 'docker-compose-loader-service.yaml'
+
+networks:
+  shared:
+    driver: bridge
+
+volumes:
+  postgres_data:

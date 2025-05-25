@@ -1,0 +1,21 @@
+services:
+  loader-service:
+    build: ./loader_serivce
+    container_name: loader-service
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=data-topic
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      kafka:
+        condition: service_healthy
+
+      jobmanager:
+        condition: service_healthy
+
+      taskmanager:
+        condition: service_healthy
+    networks:
+      - shared
