@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  jobmanager:
+    build:
+      context: devops/flink/jobmanager
+    ports:
+      - '8081:8081'
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    command: jobmanager
+    networks:
+      - shared
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/overview"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  taskmanager:
+    build:
+      context: devops/flink/taskmanager
+    depends_on:
+      jobmanager:
+        condition: service_healthy
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+    command: taskmanager
+    networks:
+      - shared
+    healthcheck:
+      test: ["CMD", "nc", "-z", "jobmanager", "6123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  flink-job:
+    build:
+      context: streaming_processing
+    depends_on:
+      jobmanager:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - shared
+    environment:
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+      JAVA_OPTS: "-Xmx512m -Xms256m --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      KAFKA_TOPIC: "data-topic"
+    entrypoint: [ "sh", "-c", "java $JAVA_OPTS -jar app.jar" ]
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "ps aux | grep '[j]ava.*app.jar'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
