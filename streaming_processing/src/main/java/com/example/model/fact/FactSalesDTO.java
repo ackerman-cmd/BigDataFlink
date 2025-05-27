@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class FactSalesDTO implements Serializable {
-    private String tempKey;            // SERIAL PRIMARY KEY
+    private String saleId;            // SERIAL PRIMARY KEY
     private String customerTempKey;     // INT, FK to dim_customer
     private String productTempKey;      // INT, FK to dim_products
     private String sellerTempKey;       // INT, FK to dim_seller

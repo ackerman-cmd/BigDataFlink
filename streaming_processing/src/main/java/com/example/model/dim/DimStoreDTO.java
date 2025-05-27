@@ -12,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class DimStoreDTO implements Serializable {
-    private Long storeId;
+    private String storeId;
 
     private String storeName;
 

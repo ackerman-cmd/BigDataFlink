@@ -12,10 +12,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class DimProductDTO implements Serializable {
-    private Long productId;
+    private String productId;
     private String productName;
     private Float productPrice;
-    private Integer productCategory;
+    private String productCategory;
     private String petCategory;
     private Float productWeight;
     private String productColor;

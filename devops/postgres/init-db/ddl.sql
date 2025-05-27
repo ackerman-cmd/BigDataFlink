@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS dim_customer;
 
 -- 1. Клиенты
 CREATE TABLE dim_customer (
-                              customer_id UUID PRIMARY KEY,
+                              customer_id TEXT PRIMARY KEY,
                               first_name VARCHAR(50),
                               last_name VARCHAR(50),
                               age INT
@@ -25,20 +25,20 @@ CREATE TABLE dim_customer (
 
 -- 2. Продавцы
 CREATE TABLE dim_seller (
-                            seller_id UUID PRIMARY KEY,
+                            seller_id TEXT PRIMARY KEY,
                             seller_first_name VARCHAR(50),
                             seller_last_name VARCHAR(50)
 );
 
 -- 3. Категории товаров
 CREATE TABLE product_categories (
-                                    category_id UUID PRIMARY KEY,
+                                    category_id TEXT PRIMARY KEY,
                                     category_name VARCHAR(50)
 );
 
 -- 4. Магазины
 CREATE TABLE dim_store (
-                           store_id UUID PRIMARY KEY,
+                           store_id TEXT PRIMARY KEY,
                            store_name VARCHAR(50),
                            store_location VARCHAR(50),
                            store_city VARCHAR(50)
@@ -46,7 +46,7 @@ CREATE TABLE dim_store (
 
 -- 5. Поставщики
 CREATE TABLE dim_supplier (
-                              supplier_id UUID PRIMARY KEY,
+                              supplier_id TEXT PRIMARY KEY,
                               supplier_contact VARCHAR(50),
                               supplier_city VARCHAR(50),
                               supplier_address VARCHAR(50)
@@ -54,98 +54,82 @@ CREATE TABLE dim_supplier (
 
 -- 6. Товары
 CREATE TABLE dim_products (
-                              product_id UUID PRIMARY KEY,
+                              product_id TEXT PRIMARY KEY,
                               product_name VARCHAR(50),
-                              product_price FLOAT(4),
-                              product_category uuid,
+                              product_price FLOAT,
+                              product_category TEXT,
                               pet_category VARCHAR(50),
                               product_weight FLOAT,
                               product_color VARCHAR(50),
                               product_size VARCHAR(50),
                               product_material VARCHAR(50),
                               product_brand VARCHAR(50),
-                              product_description TEXT,
-                              FOREIGN KEY(product_category) REFERENCES product_categories(category_id)
+                              product_description TEXT
 );
 
 -- 7. Контакты клиентов
 CREATE TABLE customer_contact_info (
-                                       customer_id UUID PRIMARY KEY,
+                                       customer_id TEXT PRIMARY KEY,
                                        customer_email VARCHAR(50),
                                        customer_country VARCHAR(50),
                                        customer_postal_code VARCHAR(50),
-                                       FOREIGN KEY (customer_id) REFERENCES dim_customer(customer_id) ON DELETE CASCADE,
                                        UNIQUE(customer_email)
 );
 
 -- 8. Питомцы клиентов
 CREATE TABLE customer_pet_info (
-                                   customer_id UUID PRIMARY KEY,
+                                   customer_id TEXT PRIMARY KEY,
                                    pet_type VARCHAR(50),
                                    pet_name VARCHAR(50),
-                                   pet_breed VARCHAR(50),
-                                       FOREIGN KEY (customer_id) REFERENCES dim_customer(customer_id) ON DELETE CASCADE
+                                   pet_breed VARCHAR(50)
 );
 
 -- 9. Контакты продавцов
 CREATE TABLE seller_contact_info (
-                                     seller_id UUID PRIMARY KEY,
+                                     seller_id TEXT PRIMARY KEY,
                                      seller_email VARCHAR(50),
                                      seller_country VARCHAR(50),
                                      seller_postal_code VARCHAR(50),
-                                     FOREIGN KEY (seller_id) REFERENCES dim_seller(seller_id) ON DELETE CASCADE,
                                      UNIQUE(seller_email)
 );
 
 -- 10. Информация о магазинах
 CREATE TABLE store_info (
-                            store_id UUID PRIMARY KEY,
+                            store_id TEXT PRIMARY KEY,
                             store_state VARCHAR(50),
                             store_country VARCHAR(50),
                             store_phone VARCHAR(50),
                             store_email VARCHAR(50),
-                            FOREIGN KEY (store_id) REFERENCES dim_store(store_id) ON DELETE CASCADE,
                             UNIQUE(store_email)
 );
 
 -- 11. Информация о поставщиках
 CREATE TABLE supplier_info (
-                               supplier_id UUID PRIMARY KEY,
+                               supplier_id TEXT PRIMARY KEY,
                                supplier_email VARCHAR(50),
                                supplier_phone VARCHAR(50),
                                supplier_country VARCHAR(50),
-                               FOREIGN KEY (supplier_id) REFERENCES dim_supplier(supplier_id) ON DELETE CASCADE,
                                UNIQUE(supplier_email)
 );
 
 -- 12. Статистика товаров
 CREATE TABLE product_statistics (
-                                    product_id UUID PRIMARY KEY,
+                                    product_id TEXT PRIMARY KEY,
                                     product_rating FLOAT,
                                     product_reviews INT,
                                     product_release_date DATE,
-                                    product_expiry_date DATE,
-                                    FOREIGN KEY(product_id) REFERENCES dim_products(product_id)
+                                    product_expiry_date DATE
 );
 
 -- 13. Факты продаж
 CREATE TABLE fact_sales (
-                            sale_id UUID PRIMARY KEY,
-                            customer_id UUID NOT NULL,
-                            product_id UUID NOT NULL,
-                            seller_id UUID NOT NULL,
-                            store_id UUID NOT NULL,
-                            supplier_id UUID NOT NULL,
+                            sale_id TEXT PRIMARY KEY,
+                            customer_id TEXT NOT NULL,
+                            product_id TEXT NOT NULL,
+                            seller_id TEXT NOT NULL,
+                            store_id TEXT NOT NULL,
+                            supplier_id TEXT NOT NULL,
                             sale_date DATE NOT NULL,
                             product_quantity INT NOT NULL,
-                            total_amount DECIMAL,
-                            FOREIGN KEY (customer_id) REFERENCES dim_customer(customer_id),
-                            FOREIGN KEY (product_id) REFERENCES dim_products(product_id),
-                            FOREIGN KEY (seller_id) REFERENCES dim_seller(seller_id),
-                            FOREIGN KEY (store_id) REFERENCES dim_store(store_id),
-                            FOREIGN KEY (supplier_id) REFERENCES dim_supplier(supplier_id)
+                            total_amount DECIMAL(10, 2)
 );
-
-
-
-

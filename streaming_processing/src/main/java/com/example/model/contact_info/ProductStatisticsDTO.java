@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class ProductStatisticsDTO implements Serializable {
-    private Long productId;          // INT PRIMARY KEY, FK to dim_products
+    private String productId;          // INT PRIMARY KEY, FK to dim_products
     private Float productRating;        // FLOAT
     private Integer productReviews;     // INT
     private LocalDate productReleaseDate; // DATE

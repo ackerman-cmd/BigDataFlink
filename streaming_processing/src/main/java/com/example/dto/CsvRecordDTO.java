@@ -168,5 +168,15 @@ public class CsvRecordDTO {
     @JsonProperty("supplier_country")
     private String supplierCountry;
 
+
     private String tempKey;
+    private String customerTempKey;
+    private String sellerTempKey;
+    private String productTempKey;
+    private String storeTempKey;
+    private String supplierTempKey;
+    private String categoryTempKey;
+    private String uniqueKey; // Новое поле для уникального ключа
 }
+
+

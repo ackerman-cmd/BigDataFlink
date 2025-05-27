@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +43,7 @@ public class CsvProcessingService {
     private String topic;
 
     private static final int THREAD_POOL_SIZE = 10;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yyyy");
 
     public void processFiles() {
         log.info("Starting CSV processing from directory: {}", sourcePath);
@@ -134,6 +136,7 @@ public class CsvProcessingService {
     }
 
     private void sendToKafka(String json, Path filePath, long lineNumber) {
+        log.info("Preparing to send to Kafka from file {} (line {}): {}", filePath, lineNumber, json); // Лог JSON перед отправкой
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, json);
         future.whenComplete((result, throwable) -> {
             if (throwable == null) {
@@ -148,6 +151,7 @@ public class CsvProcessingService {
             return null;
         });
     }
+
 
     private boolean isValidRecord(CsvRecordDTO dto) {
         if (dto == null) {

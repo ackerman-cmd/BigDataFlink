@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class ProductCategoriesDTO implements Serializable {
-    private Long categoryId;
+    private String categoryId;
     private String categoryName;
     private String tempKey;
 }
