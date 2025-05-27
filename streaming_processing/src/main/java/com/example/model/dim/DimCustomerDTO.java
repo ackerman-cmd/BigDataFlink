@@ -19,4 +19,5 @@ public class DimCustomerDTO implements Serializable {
     private String lastName;
 
     private int age;
+    private String tempKey;
 }

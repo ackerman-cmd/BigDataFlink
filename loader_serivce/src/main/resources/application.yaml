@@ -1,13 +1,14 @@
 spring:
-  application:
-    name: csv-processor
-
-kafka:
-  bootstrap:
-    servers: kafka:9092
-  client:
-    id: producer
-  topic: data-topic
+  kafka:
+    bootstrap-servers: kafka:9092
+    topic: data-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 
 file:
   source:

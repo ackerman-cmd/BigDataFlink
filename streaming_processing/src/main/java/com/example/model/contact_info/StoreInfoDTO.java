@@ -16,5 +16,6 @@ public class StoreInfoDTO implements Serializable {
     private String storeState;    // VARCHAR(50)
     private String storeCountry;  // VARCHAR(50)
     private String storePhone;    // VARCHAR(50)
-    private String storeEmail;    // VARCHAR(50), UNIQUE
+    private String storeEmail;
+    private String tempKey;// VARCHAR(50), UNIQUE
 }

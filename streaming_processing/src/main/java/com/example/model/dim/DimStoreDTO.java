@@ -19,4 +19,5 @@ public class DimStoreDTO implements Serializable {
     private String storeLocation;
 
     private String storeCity;
+    private String tempKey;
 }

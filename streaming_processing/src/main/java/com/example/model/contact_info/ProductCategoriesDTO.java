@@ -11,4 +11,5 @@ import java.io.Serializable;
 public class ProductCategoriesDTO implements Serializable {
     private Long categoryId;
     private String categoryName;
+    private String tempKey;
 }

@@ -17,5 +17,6 @@ public class ProductStatisticsDTO implements Serializable {
     private Float productRating;        // FLOAT
     private Integer productReviews;     // INT
     private LocalDate productReleaseDate; // DATE
-    private LocalDate productExpiryDate;  // DATE
+    private LocalDate productExpiryDate;
+    private String tempKey;// DATE
 }

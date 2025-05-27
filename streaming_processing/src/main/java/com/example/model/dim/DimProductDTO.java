@@ -23,4 +23,5 @@ public class DimProductDTO implements Serializable {
     private String productMaterial;
     private String productBrand;
     private String productDescription;
+    private String tempKey;
 }

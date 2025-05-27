@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 @Builder
@@ -73,7 +74,7 @@ public class CsvRecordDTO {
 
     @JsonProperty("sale_date")
     @JsonFormat(pattern = "M/d/yyyy")
-    private LocalDate saleDate;
+    private Date saleDate;
 
     @JsonProperty("sale_customer_id")
     private Long saleCustomerId;
@@ -140,11 +141,11 @@ public class CsvRecordDTO {
 
     @JsonProperty("product_release_date")
     @JsonFormat(pattern = "M/d/yyyy")
-    private LocalDate productReleaseDate;
+    private Date productReleaseDate;
 
     @JsonProperty("product_expiry_date")
     @JsonFormat(pattern = "M/d/yyyy")
-    private LocalDate productExpiryDate;
+    private Date productExpiryDate;
 
     @JsonProperty("supplier_name")
     private String supplierName;
@@ -166,4 +167,6 @@ public class CsvRecordDTO {
 
     @JsonProperty("supplier_country")
     private String supplierCountry;
+
+    private String tempKey;
 }

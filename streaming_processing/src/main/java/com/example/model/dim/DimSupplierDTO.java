@@ -20,4 +20,5 @@ public class DimSupplierDTO implements Serializable {
     private String supplierCity;
 
     private String supplierAddress;
+    private String tempKey;
 }

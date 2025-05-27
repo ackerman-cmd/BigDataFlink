@@ -8,24 +8,25 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.CsvToBeanFilter;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
@@ -109,7 +110,7 @@ public class CsvProcessingService {
                         continue;
                     }
                     String json = objectMapper.writeValueAsString(dto);
-                    kafkaTemplate.send(topic, json);
+                    sendToKafka(json, filePath, processedLines + 1);
                     processedLines++;
 
                     if (processedLines % 1000 == 0) {
@@ -130,6 +131,22 @@ public class CsvProcessingService {
         } catch (Exception e) {
             log.error("Error reading file: {}", filePath, e);
         }
+    }
+
+    private void sendToKafka(String json, Path filePath, long lineNumber) {
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, json);
+        future.whenComplete((result, throwable) -> {
+            if (throwable == null) {
+                RecordMetadata metadata = result.getRecordMetadata();
+                log.info("Successfully sent record from file {} (line {}): topic={}, partition={}, offset={}, timestamp={}",
+                        filePath, lineNumber, metadata.topic(), metadata.partition(), metadata.offset(), metadata.timestamp());
+            } else {
+                log.error("Failed to send record from file {} (line {}): {}", filePath, lineNumber, throwable.getMessage(), throwable);
+            }
+        }).exceptionally(throwable -> {
+            log.error("Exception while sending record from file {} (line {}): {}", filePath, lineNumber, throwable.getMessage(), throwable);
+            return null;
+        });
     }
 
     private boolean isValidRecord(CsvRecordDTO dto) {

@@ -4,6 +4,7 @@ services:
   jobmanager:
     build:
       context: devops/flink/jobmanager
+    container_name: jobmanager
     ports:
       - '8081:8081'
     environment:
@@ -21,11 +22,13 @@ services:
   taskmanager:
     build:
       context: devops/flink/taskmanager
+    container_name: taskmanager
     depends_on:
       jobmanager:
         condition: service_healthy
     environment:
       FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
+      JAVA_OPTS: "-Xmx512m -Xms256m --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens java.base/java.util.stream=ALL-UNNAMED --add-opens java.base/java.util.function=ALL-UNNAMED"
     command: taskmanager
     networks:
       - shared
@@ -39,23 +42,21 @@ services:
   flink-job:
     build:
       context: streaming_processing
+    container_name: flink-job
     depends_on:
-      jobmanager:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+      - taskmanager
+      - postgres
+      - kafka
     networks:
       - shared
     environment:
       FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
-      JAVA_OPTS: "-Xmx512m -Xms256m --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED"
       KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       KAFKA_TOPIC: "data-topic"
-    entrypoint: [ "sh", "-c", "java $JAVA_OPTS -jar app.jar" ]
+      JAVA_OPTS: "-Xmx512m -Xms256m --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.math=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED --add-opens java.base/java.text=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens java.base/java.util.stream=ALL-UNNAMED --add-opens java.base/java.util.function=ALL-UNNAMED"
+    entrypoint: [ "sh", "-c", "java -jar app.jar" ]
     healthcheck:
-      test: [ "CMD", "sh", "-c", "ps aux | grep '[j]ava.*app.jar'" ]
+      test: [ "CMD", "-c", "ps aux | grep '[j]ava.*app.jar'" ]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -6,16 +6,8 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - KAFKA_TOPIC=data-topic
     depends_on:
-      postgres:
-        condition: service_healthy
-
-      kafka:
-        condition: service_healthy
-
-      jobmanager:
-        condition: service_healthy
-
-      taskmanager:
-        condition: service_healthy
+      - postgres
+      - kafka
+      - taskmanager
     networks:
       - shared

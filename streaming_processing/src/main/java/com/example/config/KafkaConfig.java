@@ -25,7 +25,10 @@ public class KafkaConfig {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", kafkaBootstrap);
         properties.setProperty("group.id", "flink-consumer");
-
+        properties.setProperty("security.protocol", "SASL_PLAINTEXT");
+        properties.setProperty("sasl.mechanism", "PLAIN");
+        properties.setProperty("sasl.jaas.config",
+                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"admin\" password=\"admin-secret\";");
         return properties;
     }
 

@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS dim_customer;
 
 -- 1. Клиенты
 CREATE TABLE dim_customer (
-                              customer_id SERIAL PRIMARY KEY,
+                              customer_id UUID PRIMARY KEY,
                               first_name VARCHAR(50),
                               last_name VARCHAR(50),
                               age INT
@@ -25,20 +25,20 @@ CREATE TABLE dim_customer (
 
 -- 2. Продавцы
 CREATE TABLE dim_seller (
-                            seller_id SERIAL PRIMARY KEY,
+                            seller_id UUID PRIMARY KEY,
                             seller_first_name VARCHAR(50),
                             seller_last_name VARCHAR(50)
 );
 
 -- 3. Категории товаров
 CREATE TABLE product_categories (
-                                    category_id SERIAL PRIMARY KEY,
+                                    category_id UUID PRIMARY KEY,
                                     category_name VARCHAR(50)
 );
 
 -- 4. Магазины
 CREATE TABLE dim_store (
-                           store_id SERIAL PRIMARY KEY,
+                           store_id UUID PRIMARY KEY,
                            store_name VARCHAR(50),
                            store_location VARCHAR(50),
                            store_city VARCHAR(50)
@@ -46,7 +46,7 @@ CREATE TABLE dim_store (
 
 -- 5. Поставщики
 CREATE TABLE dim_supplier (
-                              supplier_id SERIAL PRIMARY KEY,
+                              supplier_id UUID PRIMARY KEY,
                               supplier_contact VARCHAR(50),
                               supplier_city VARCHAR(50),
                               supplier_address VARCHAR(50)
@@ -54,10 +54,10 @@ CREATE TABLE dim_supplier (
 
 -- 6. Товары
 CREATE TABLE dim_products (
-                              product_id SERIAL PRIMARY KEY,
+                              product_id UUID PRIMARY KEY,
                               product_name VARCHAR(50),
                               product_price FLOAT(4),
-                              product_category INT,
+                              product_category uuid,
                               pet_category VARCHAR(50),
                               product_weight FLOAT,
                               product_color VARCHAR(50),
@@ -70,7 +70,7 @@ CREATE TABLE dim_products (
 
 -- 7. Контакты клиентов
 CREATE TABLE customer_contact_info (
-                                       customer_id INT PRIMARY KEY,
+                                       customer_id UUID PRIMARY KEY,
                                        customer_email VARCHAR(50),
                                        customer_country VARCHAR(50),
                                        customer_postal_code VARCHAR(50),
@@ -80,16 +80,16 @@ CREATE TABLE customer_contact_info (
 
 -- 8. Питомцы клиентов
 CREATE TABLE customer_pet_info (
-                                   customer_id INT PRIMARY KEY,
+                                   customer_id UUID PRIMARY KEY,
                                    pet_type VARCHAR(50),
                                    pet_name VARCHAR(50),
                                    pet_breed VARCHAR(50),
-                                   FOREIGN KEY (customer_id) REFERENCES dim_customer(customer_id) ON DELETE CASCADE
+                                       FOREIGN KEY (customer_id) REFERENCES dim_customer(customer_id) ON DELETE CASCADE
 );
 
 -- 9. Контакты продавцов
 CREATE TABLE seller_contact_info (
-                                     seller_id INT PRIMARY KEY,
+                                     seller_id UUID PRIMARY KEY,
                                      seller_email VARCHAR(50),
                                      seller_country VARCHAR(50),
                                      seller_postal_code VARCHAR(50),
@@ -99,7 +99,7 @@ CREATE TABLE seller_contact_info (
 
 -- 10. Информация о магазинах
 CREATE TABLE store_info (
-                            store_id INT PRIMARY KEY,
+                            store_id UUID PRIMARY KEY,
                             store_state VARCHAR(50),
                             store_country VARCHAR(50),
                             store_phone VARCHAR(50),
@@ -110,7 +110,7 @@ CREATE TABLE store_info (
 
 -- 11. Информация о поставщиках
 CREATE TABLE supplier_info (
-                               supplier_id INT PRIMARY KEY,
+                               supplier_id UUID PRIMARY KEY,
                                supplier_email VARCHAR(50),
                                supplier_phone VARCHAR(50),
                                supplier_country VARCHAR(50),
@@ -120,7 +120,7 @@ CREATE TABLE supplier_info (
 
 -- 12. Статистика товаров
 CREATE TABLE product_statistics (
-                                    product_id INT PRIMARY KEY,
+                                    product_id UUID PRIMARY KEY,
                                     product_rating FLOAT,
                                     product_reviews INT,
                                     product_release_date DATE,
@@ -130,12 +130,12 @@ CREATE TABLE product_statistics (
 
 -- 13. Факты продаж
 CREATE TABLE fact_sales (
-                            sale_id SERIAL PRIMARY KEY,
-                            customer_id INT NOT NULL,
-                            product_id INT NOT NULL,
-                            seller_id INT NOT NULL,
-                            store_id INT NOT NULL,
-                            supplier_id INT NOT NULL,
+                            sale_id UUID PRIMARY KEY,
+                            customer_id UUID NOT NULL,
+                            product_id UUID NOT NULL,
+                            seller_id UUID NOT NULL,
+                            store_id UUID NOT NULL,
+                            supplier_id UUID NOT NULL,
                             sale_date DATE NOT NULL,
                             product_quantity INT NOT NULL,
                             total_amount DECIMAL,

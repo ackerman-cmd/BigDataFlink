@@ -17,5 +17,6 @@ public class DimSellerDTO implements Serializable {
     private String sellerFirstName;
 
     private String sellerLastName;
+    private String tempKey;
 
 }
