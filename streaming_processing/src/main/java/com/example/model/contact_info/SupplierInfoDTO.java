@@ -12,9 +12,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class SupplierInfoDTO implements Serializable {
-    private String supplierId;      // INT PRIMARY KEY, FK to dim_supplier
-    private String supplierEmail;    // VARCHAR(50), UNIQUE
-    private String supplierPhone;    // VARCHAR(50)
+    private Long supplierId;
+    private String supplierEmail;
+    private String supplierPhone;
     private String supplierCountry;
-    private String tempKey;// VARCHAR(50)
 }

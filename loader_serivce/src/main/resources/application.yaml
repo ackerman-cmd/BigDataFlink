@@ -19,6 +19,5 @@ logging:
   level:
     root: INFO
     com.example: INFO
-    org.apache.flink: INFO
     org.apache.kafka: INFO
     org.springframework: INFO 

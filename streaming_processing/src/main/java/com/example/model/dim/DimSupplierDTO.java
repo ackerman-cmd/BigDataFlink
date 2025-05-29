@@ -13,12 +13,12 @@ import java.io.Serializable;
 @Builder
 public class DimSupplierDTO implements Serializable {
 
-    private String supplierId;
+    private Long supplierId;
 
     private String supplierContact;
 
     private String supplierCity;
 
     private String supplierAddress;
-    private String tempKey;
+
 }

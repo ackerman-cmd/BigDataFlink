@@ -12,9 +12,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class SellerContactInfoDTO implements Serializable {
-    private String sellerId;         // INT PRIMARY KEY, FK to dim_seller
-    private String sellerEmail;       // VARCHAR(50), UNIQUE
-    private String sellerCountry;     // VARCHAR(50)
+    private Long sellerId;
+    private String sellerEmail;
+    private String sellerCountry;
     private String sellerPostalCode;
-    private String tempKey;// VARCHAR(50)
 }

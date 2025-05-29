@@ -12,10 +12,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class StoreInfoDTO implements Serializable {
-    private String storeId;      // INT PRIMARY KEY, FK to dim_store
-    private String storeState;    // VARCHAR(50)
-    private String storeCountry;  // VARCHAR(50)
-    private String storePhone;    // VARCHAR(50)
+    private Long storeId;
+    private String storeState;
+    private String storeCountry;
+    private String storePhone;
     private String storeEmail;
-    private String tempKey;// VARCHAR(50), UNIQUE
 }

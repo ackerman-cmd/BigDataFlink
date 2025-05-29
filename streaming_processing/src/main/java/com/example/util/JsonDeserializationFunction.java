@@ -4,6 +4,8 @@ import com.example.dto.CsvRecordDTO;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ public class JsonDeserializationFunction extends ProcessFunction<String, CsvReco
     @Override
     public void open(org.apache.flink.configuration.Configuration parameters) throws Exception {
         super.open(parameters);
+        log.info("Инициализация JsonDeserializationFunction");
         objectMapper = new ObjectMapper();
         objectMapper.setDateFormat(new SimpleDateFormat("M/d/yyyy"));
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -27,22 +30,38 @@ public class JsonDeserializationFunction extends ProcessFunction<String, CsvReco
     }
 
     @Override
-    public void processElement(String jsonString, Context ctx, Collector<CsvRecordDTO> out) throws Exception {
+    public void processElement(String jsonString, Context ctx, Collector<CsvRecordDTO> out) {
         try {
             if (jsonString == null || jsonString.trim().isEmpty()) {
-                log.warn("Received empty or null JSON: {}", jsonString);
+                log.warn("Получен пустой или null JSON: {}", jsonString);
                 return;
             }
-            log.debug("Processing JSON: {}", jsonString);
+            log.info("Обработка JSON: {}", jsonString);
             CsvRecordDTO record = objectMapper.readValue(jsonString, CsvRecordDTO.class);
-            if (record != null) {
-                out.collect(record);
-            } else {
-                log.warn("Deserialized record is null for JSON: {}", jsonString);
+            if (record == null) {
+                log.warn("Десериализованная запись null для JSON: {}", jsonString);
+                return;
             }
+            log.info("Успешно десериализован JSON в CsvRecordDTO: id={}, sale_customer_id={}, sale_seller_id={}, sale_product_id={}, product_category={}",
+                    record.getId(), record.getSaleCustomerId(), record.getSaleSellerId(), record.getSaleProductId(), record.getProductCategory());
+            // Проверка критических полей
+            if (record.getId() == null || record.getSaleCustomerId() == null || record.getSaleSellerId() == null ||
+                    record.getSaleProductId() == null || record.getProductCategory() == null) {
+                log.warn("Отсутствуют критические поля в CsvRecordDTO: id={}, sale_customer_id={}, sale_seller_id={}, sale_product_id={}, product_category={}",
+                        record.getId(), record.getSaleCustomerId(), record.getSaleSellerId(), record.getSaleProductId(), record.getProductCategory());
+                return;
+            }
+            out.collect(record);
+        } catch (InvalidFormatException e) {
+            String fieldName = e.getPath() != null && !e.getPath().isEmpty() ? e.getPath().get(0).getFieldName() : "неизвестно";
+            String value = e.getValue() != null ? e.getValue().toString() : "null";
+            log.error("Неверный формат для поля '{}'. Значение: '{}'. Ожидаемый тип: {}. JSON: {}. Ошибка: {}",
+                    fieldName, value, e.getTargetType(), jsonString, e.getMessage(), e);
+        } catch (MismatchedInputException e) {
+            String fieldName = e.getPath() != null && !e.getPath().isEmpty() ? e.getPath().get(0).getFieldName() : "неизвестно";
+            log.error("Несоответствие ввода для поля '{}'. JSON: {}. Ошибка: {}", fieldName, jsonString, e.getMessage(), e);
         } catch (Exception e) {
-            log.error("Error deserializing JSON: {}. Cause: {}, StackTrace: {}", jsonString, e.getCause(), e.getStackTrace(), e);
-            // Пропускаем ошибочную запись
+            log.error("Ошибка десериализации JSON: {}. Причина: {}, Сообщение: {}", jsonString, e.getCause(), e.getMessage(), e);
         }
     }
 }

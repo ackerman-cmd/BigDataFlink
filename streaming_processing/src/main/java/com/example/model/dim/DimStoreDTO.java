@@ -12,12 +12,12 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class DimStoreDTO implements Serializable {
-    private String storeId;
+    private Long storeId;
 
     private String storeName;
 
     private String storeLocation;
 
     private String storeCity;
-    private String tempKey;
+
 }

@@ -11,7 +11,6 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,6 +27,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.example.validation.ValidationUtil.isValidRecord;
 
 @Slf4j
 @Service
@@ -44,6 +46,7 @@ public class CsvProcessingService {
 
     private static final int THREAD_POOL_SIZE = 10;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yyyy");
+    private static final AtomicLong counter = new AtomicLong(1);
 
     public void processFiles() {
         log.info("Starting CSV processing from directory: {}", sourcePath);
@@ -106,6 +109,7 @@ public class CsvProcessingService {
 
             for (CsvRecordDTO dto : csvToBean) {
                 try {
+                    dto.setId(counter.getAndIncrement());
                     if (!isValidRecord(dto)) {
                         log.warn("Invalid record in file {}: {}. Skipping.", filePath, dto);
                         skippedLines++;
@@ -153,21 +157,4 @@ public class CsvProcessingService {
     }
 
 
-    private boolean isValidRecord(CsvRecordDTO dto) {
-        if (dto == null) {
-            return false;
-        }
-        return dto.getId() != null &&
-                dto.getCustomerAge() != null &&
-                dto.getProductPrice() != null &&
-                dto.getSaleDate() != null &&
-                dto.getSaleCustomerId() != null &&
-                dto.getSaleSellerId() != null &&
-                dto.getSaleProductId() != null &&
-                dto.getSaleQuantity() != null &&
-                dto.getSaleTotalPrice() != null &&
-                dto.getProductWeight() != null &&
-                dto.getProductRating() != null &&
-                dto.getProductReviews() != null;
-    }
 }

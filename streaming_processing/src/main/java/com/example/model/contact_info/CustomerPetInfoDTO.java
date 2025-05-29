@@ -12,9 +12,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class CustomerPetInfoDTO implements Serializable {
-    private String customerId;    // INT PRIMARY KEY, FK to dim_customer
-    private String petType;       // VARCHAR(50)
-    private String petName;       // VARCHAR(50)
+    private Long customerId;
+    private String petType;
+    private String petName;
     private String petBreed;
-    private String tempKey;// VARCHAR(50)
+
 }

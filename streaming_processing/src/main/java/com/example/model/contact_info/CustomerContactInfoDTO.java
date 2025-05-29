@@ -12,9 +12,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class CustomerContactInfoDTO implements Serializable {
-    private String customerId;       // INT PRIMARY KEY, FK to dim_customer
-    private String customerEmail;     // VARCHAR(50), UNIQUE
-    private String customerCountry;   // VARCHAR(50)
+    private Long customerId;
+    private String customerEmail;
+    private String customerCountry;
     private String customerPostalCode;
-    private String tempKey;// VARCHAR(50)
+
 }

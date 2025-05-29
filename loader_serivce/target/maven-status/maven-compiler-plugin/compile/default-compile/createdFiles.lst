@@ -1,0 +1,6 @@
+com\example\config\kafka\KafkaProducerConfig.class
+com\example\Application.class
+com\example\dto\CsvRecordDTO$CsvRecordDTOBuilder.class
+com\example\dto\CsvRecordDTO.class
+com\example\service\CsvProcessingService.class
+com\example\validation\ValidationUtil.class
